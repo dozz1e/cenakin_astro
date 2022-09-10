@@ -1,0 +1,115 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const response = await fetch("https://cenakin.cl/otec/graphql",{
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      query: `
+        query NewQuery {
+          products(first: 100) {
+            edges {
+              node {
+                name
+                slug
+                productCategories(first: 10) {
+                  nodes {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      `,
+    }),
+  });
+
+  const json = await response.json();
+  return json.data.products.edges.map((curso) => {
+    return {
+      params: { slug: curso.node.slug },
+    };
+  });
+}
+
+const { slug } = Astro.params;
+
+const response = await fetch("https://cenakin.cl/otec/graphql",{
+  method: 'POST',
+  headers: {'Content-Type':'application/json'},
+  body: JSON.stringify({
+    query: `
+      query NewQuery {
+        product(id: "${slug}", idType: SLUG) {
+          description
+          name
+          productCategories(first: 10) {
+            nodes {
+              name
+            }
+          }
+          valores {
+            descripcionValor
+          }
+          textos {
+            texto2
+            texto3
+            texto4
+            texto5
+          }
+          promociones {
+            promociones
+          }
+          profesores {
+            profesores
+          }
+          pago {
+            mediosPago
+          }
+          objetivo {
+            objetivo
+          }
+          imaGenes {
+            titulo3
+            titulo4
+            titulo5
+            titulo6
+            titulo7
+          }
+          incluye {
+            incluye
+          }
+          formato {
+            formato
+          }
+          fechas {
+            fechaInicio
+            fechaTermino
+            horaInicio
+            horaTermino
+          }
+          dirigidoA {
+            dirigido
+          }
+          estudios {
+            planEstudios
+          }
+          botones {
+            accion
+          }
+        }
+      }
+    `,
+  }),
+});
+
+const json = await response.json();
+const curso = json.data.product;
+---
+
+<Layout title="Prueba Cursos">
+  <h1>{curso.name}</h1>
+  <p set:html={curso.description}></p>
+</Layout>
